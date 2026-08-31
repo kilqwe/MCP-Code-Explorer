@@ -61,7 +61,12 @@ def generate_churn_heatmap(relative_dir: str = ".") -> dict:
         # Get raw list of every file touched in git history.
         result = subprocess.run(
             ["git", "log", "--format=format:", "--name-only"],
-            cwd=target_dir, capture_output=True, text=True, check=True
+            cwd=target_dir, 
+            capture_output=True, 
+            text=True, 
+            check=True, 
+            timeout=10, 
+            stdin=subprocess.DEVNULL
         )
     except Exception as e:
         return {"error": f"Requires a local git repository. {e}"}

@@ -1,5 +1,5 @@
 from fastmcp import FastMCP
-from tools import audit_tools, complexity_tools, file_tools, git_change_tools, outline_tools, github_tools, search_tools, dependency_tools
+from tools import audit_tools, complexity_tools, file_tools, git_change_tools, outline_tools, github_tools, search_tools, dependency_tools, config_tools
 
 mcp = FastMCP("CodeAnalyzer")
 
@@ -56,6 +56,7 @@ def score_complexity(relative_path: str) -> dict:
     """Calculates the cyclomatic complexity of functions in a Python file to identify complex code."""
     return complexity_tools.score_complexity(relative_path)
 
+@mcp.tool()
 def analyze_git_changes(relative_dir: str = ".") -> dict:
     """Analyzes uncommitted git changes and maps modified lines directly to affected Python functions."""
     return git_change_tools.analyze_git_changes(relative_dir)
@@ -69,6 +70,11 @@ def find_dead_code(relative_dir: str = ".") -> dict:
 def generate_churn_heatmap(relative_dir: str = ".") -> dict:
     """Identifies architectural bottlenecks by combining Git commit frequency with file size (LOC)."""
     return audit_tools.generate_churn_heatmap(relative_dir)
+
+@mcp.tool()
+def get_project_config(relative_dir: str = ".") -> dict:
+    """Detects the project's framework, dependencies, config files, and build/CI setup deterministically."""
+    return config_tools.get_project_config(relative_dir)
 
 if __name__ == "__main__":
     mcp.run()

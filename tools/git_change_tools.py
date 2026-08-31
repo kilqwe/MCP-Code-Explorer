@@ -17,13 +17,17 @@ def analyze_git_changes(relative_dir: str = ".") -> dict:
     try:
         # Run git diff to get unified diff output.
         result = subprocess.run(
-            ["git", "diff", "-U0"],
+            ["git", "--no-pager","diff", "-U0"],
             cwd=target_dir,
             capture_output=True,
+            stdin = subprocess.DEVNULL,
             text=True,
-            check=True
+            check=True,
+            timeout=10
         )
         diff_output = result.stdout
+    except subprocess.TimeoutExpired:
+        return {"error": "Failed to run git diff: Timeout occurred."}
     except Exception as e:
         return {"error": f"Failed to run git diff: {e}. Ensure git is installed and directory is a git repository."}
 
