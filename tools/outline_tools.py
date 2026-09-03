@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 import time
 from tree_sitter import QueryCursor
-from utils import PROJECT_ROOT
+from utils import resolve_safe_path
 from parsers import python_parser, javascript_parser
 
 PARSERS = {
@@ -13,11 +13,12 @@ PARSERS = {
 
 def get_outline(relative_path: str) -> str:
     start_time = time.perf_counter()
-    
-    target = (PROJECT_ROOT / relative_path).resolve()
-    if not str(target).startswith(str(PROJECT_ROOT)):
+
+    try:
+        target = resolve_safe_path(relative_path)
+    except ValueError:
         return "Error: path is outside the allowed project root."
-    if not target.exists():
+    except FileNotFoundError:
         return f"Error: file not found at '{relative_path}'."
 
     ext = target.suffix
@@ -61,11 +62,12 @@ def get_outline(relative_path: str) -> str:
 
 def get_function_source(relative_path: str, function_name: str) -> str:
     start_time = time.perf_counter()
-    
-    target = (PROJECT_ROOT / relative_path).resolve()
-    if not str(target).startswith(str(PROJECT_ROOT)):
+
+    try:
+        target = resolve_safe_path(relative_path)
+    except ValueError:
         return "Error: path is outside the allowed project root."
-    if not target.exists():
+    except FileNotFoundError:
         return f"Error: file not found at '{relative_path}'."
 
     ext = target.suffix

@@ -2,15 +2,16 @@ import sys  # Test comment
 from pathlib import Path
 import os
 import time
-from utils import PROJECT_ROOT, SKIP_DIRS
+from utils import PROJECT_ROOT, SKIP_DIRS, resolve_safe_path
 from tools.outline_tools import get_outline
 
 def read_file(relative_path: str) -> str:
     """Reads and returns the raw text content of a file within the project root."""
-    target = (PROJECT_ROOT / relative_path).resolve()
-    if not str(target).startswith(str(PROJECT_ROOT)):
+    try:
+        target = resolve_safe_path(relative_path)
+    except ValueError:
         return "Error: path is outside the allowed project root."
-    if not target.exists():
+    except FileNotFoundError:
         return f"Error: file not found at '{relative_path}'."
     if not target.is_file():
         return f"Error: '{relative_path}' is not a file."
@@ -23,10 +24,13 @@ def scan_directory(relative_dir: str = ".") -> dict:
     """Recursively scans a directory with metrics."""
     start_time = time.perf_counter()
     
-    start_dir = (PROJECT_ROOT / relative_dir).resolve()
-    if not str(start_dir).startswith(str(PROJECT_ROOT)):
+    try:
+        start_dir = resolve_safe_path(relative_dir)
+    except ValueError:
         return {"error": "path is outside the allowed project root."}
-    if not start_dir.exists() or not start_dir.is_dir():
+    except FileNotFoundError:
+        return {"error": f"'{relative_dir}' is not a valid directory."}
+    if not start_dir.is_dir():
         return {"error": f"'{relative_dir}' is not a valid directory."}
 
     python_files = {}
